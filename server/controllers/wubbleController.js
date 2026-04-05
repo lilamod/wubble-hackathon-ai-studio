@@ -12,7 +12,10 @@ export const provisionWubble = async (req, res, next) => {
 
     // Create API key — just needs email, no auth
     const keyData = await wubbleService.createApiKey(user.email)
-    const apiKey = keyData.apiKey || keyData.key || keyData.token
+    console.log('[Wubble] createApiKey response:', JSON.stringify(keyData))
+    const apiKey = keyData.apiKey || keyData.key || keyData.token || keyData.api_key
+
+    if (!apiKey) return res.status(500).json({ success: false, error: 'Could not extract API key from Wubble response', raw: keyData })
 
     await userService.saveWubbleApiKey(req.user.id, apiKey)
     res.json(new ApiResponse('Wubble provisioned', { apiKey }))
@@ -21,7 +24,9 @@ export const provisionWubble = async (req, res, next) => {
 
 export const getCredits = async (req, res, next) => {
   try {
-    const credits = await wubbleService.getCredits()
+    const user = await userService.getProfile(req.user.id)
+    if (!user.wubbleApiKey) return res.status(400).json({ success: false, error: 'Wubble not connected.' })
+    const credits = await wubbleService.getCredits(user.wubbleApiKey)
     res.json(new ApiResponse('Credits fetched', { credits }))
   } catch (err) { next(err) }
 }

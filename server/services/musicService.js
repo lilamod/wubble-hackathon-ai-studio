@@ -33,11 +33,9 @@ export class MusicService {
     return parts.join(' ')
   }
 
-  async createTrack({ userId, prompt, mood, contentType, tempo, instruments }) {
+  async createTrack({ userId, wubbleApiKey, prompt, mood, contentType, tempo, instruments }) {
     const musicPrompt = this.buildMusicPrompt({ prompt, mood, contentType, tempo, instruments })
-
-    // Kick off Wubble generation
-    const wubbleRes = await wubbleService.generateMusic({ prompt: musicPrompt })
+    const wubbleRes = await wubbleService.generateMusic({ prompt: musicPrompt }, wubbleApiKey)
 
     const track = await MusicTrack.create({
       userId,
@@ -49,17 +47,16 @@ export class MusicService {
       title: `${mood} ${contentType} track`,
       wubbleResponse: wubbleRes
     })
-
     return track
   }
 
-  async pollTrack(trackId, userId) {
+  async pollTrack(trackId, userId, wubbleApiKey) {
     const track = await MusicTrack.findOne({ _id: trackId, userId })
     if (!track) throw new Error('Track not found')
     if (track.status === 'completed') return track
     if (!track.requestId) throw new Error('No requestId for this track')
 
-    const pollRes = await wubbleService.pollStatus(track.requestId)
+    const pollRes = await wubbleService.pollStatus(track.requestId, wubbleApiKey)
 
     // Normalize Wubble response — adapt field names as their API evolves
     const status = pollRes.status?.toLowerCase()
