@@ -25,6 +25,17 @@ export interface MusicTrack {
   updatedAt: string
 }
 
+export interface GeneratedPost {
+  id?: string
+  _id?: string
+  content: string
+  hashtags?: string[]
+  tone?: string
+  niche?: string
+  emoji?: string
+  cta?: string
+}
+
 export interface AudienceInsight {
   demographics: { label: string; percentage: number }[]
   peak_times: string[]
