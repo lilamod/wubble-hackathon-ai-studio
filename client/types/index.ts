@@ -25,6 +25,12 @@ export interface MusicTrack {
   updatedAt: string
 }
 
+export interface AudienceInsight {
+  demographics: { label: string; percentage: number }[]
+  peak_times: string[]
+  interests: string[]
+}
+
 export interface ApiResponse<T = any> {
   success: boolean
   message: string
