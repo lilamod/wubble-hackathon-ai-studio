@@ -1,8 +1,7 @@
 import { userService } from '../services/userService.js'
 import { ApiResponse } from '../utils/apiResponse.js'
-import asyncHandler from 'express-async-handler'
 
-export const registerUser = asyncHandler(async (req, res) => {
+export const registerUser = async (req, res) => {
   const { email, password } = req.body
   const { user, token } = await userService.register(email, password)
   res.status(201).json(
@@ -11,9 +10,9 @@ export const registerUser = asyncHandler(async (req, res) => {
       token
     })
   )
-})
+}
 
-export const loginUser = asyncHandler(async (req, res) => {
+export const loginUser = async (req, res) => {
   const { email, password } = req.body
   const { user, token } = await userService.login(email, password)
   res.json(
@@ -22,9 +21,9 @@ export const loginUser = asyncHandler(async (req, res) => {
       token
     })
   )
-})
+}
 
-export const getMe = asyncHandler(async (req, res) => {
+export const getMe = async (req, res) => {
   const user = await userService.getProfile(req.user.id)
   res.json(new ApiResponse('Profile fetched successfully', user))
-})
+}

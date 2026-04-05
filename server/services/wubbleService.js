@@ -75,11 +75,26 @@ export class WubbleService {
     return data
   }
 
+  async predictPostPerformance(content, accountId) {
+    // Gracefully return empty prediction if not supported
+    try {
+      const res = await fetch(`${BASE}/predict`, {
+        method: 'POST',
+        headers: this.headers,
+        body: JSON.stringify({ content, accountId })
+      })
+      const data = await res.json()
+      if (!res.ok) return {}
+      return data
+    } catch {
+      return {}
+    }
+  }
+
   // Upload a reference audio file (multipart)
   async uploadFile(fileBuffer, filename, mimetype) {
-    const { FormData, Blob } = await import('node-fetch')
     const form = new FormData()
-    form.append('file', new Blob([fileBuffer], { type: mimetype }), filename)
+    form.set('file', new Blob([fileBuffer], { type: mimetype }), filename)
 
     const res = await fetch(`${BASE}/files`, {
       method: 'POST',

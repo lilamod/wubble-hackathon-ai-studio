@@ -7,6 +7,7 @@ import mongoose from 'mongoose'
 import authRoutes from './routes/authRoutes.js'
 import wubbleRoutes from './routes/wubbleRoutes.js'
 import musicRoutes from './routes/musicRoutes.js'
+import postRoutes from './routes/postRoutes.js'
 import { errorHandler } from './middleware/errorHandler.js'
 import connectDB from './config/db.config.js'
 
@@ -23,6 +24,7 @@ app.use(express.json({ limit: '10mb' }))
 app.use('/api/auth', authRoutes)
 app.use('/api/wubble', wubbleRoutes)
 app.use('/api/music', musicRoutes)
+app.use('/api/posts', postRoutes)
 
 app.get('/health', (req, res) => {
   res.json({ status: 'OK', mongodb: mongoose.connection.readyState === 1 })
