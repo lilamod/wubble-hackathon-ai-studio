@@ -1,6 +1,6 @@
 import fetch from 'node-fetch'
 
-const BASE = 'https://api.wubble.ai/api/v1'
+const BASE = 'https://api.wubble.ai/api'
 
 export class WubbleService {
   constructor() {
@@ -14,10 +14,11 @@ export class WubbleService {
     }
   }
 
+  // POST /api/user — no auth required
   async createUser(email) {
-    const res = await fetch(`${BASE}/users`, {
+    const res = await fetch(`${BASE}/user`, {
       method: 'POST',
-      headers: this.headers,
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email })
     })
     const data = await res.json()
@@ -25,78 +26,58 @@ export class WubbleService {
     return data
   }
 
+  // POST /api/v1/apikeys — no auth required, body: { email }
+  async createApiKey(email) {
+    const res = await fetch(`${BASE}/v1/apikeys`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    })
+    const data = await res.json()
+    if (!res.ok) throw new Error(data.message || `Wubble createApiKey error: ${res.status}`)
+    // returns { apiKey, ... } or { key, ... }
+    return data
+  }
+
+  // GET /api/v1/credits — bearer auth
   async getCredits() {
-    const res = await fetch(`${BASE}/credits`, { headers: this.headers })
+    const res = await fetch(`${BASE}/v1/credits`, { headers: this.headers })
     const data = await res.json()
     if (!res.ok) throw new Error(data.message || `Wubble credits error: ${res.status}`)
     return data
   }
 
-  async createApiKey(label = 'wubble-studio') {
-    const res = await fetch(`${BASE}/keys`, {
-      method: 'POST',
-      headers: this.headers,
-      body: JSON.stringify({ label })
-    })
-    const data = await res.json()
-    if (!res.ok) throw new Error(data.message || `Wubble createApiKey error: ${res.status}`)
-    return data
-  }
-
-  // Conversational music generation
-  // prompt: text describing the music, optional fileUrl for reference audio
+  // POST /api/v1/chat — bearer auth
   async generateMusic({ prompt, fileUrl = null }) {
     const body = { message: prompt }
     if (fileUrl) body.fileUrl = fileUrl
-
-    const res = await fetch(`${BASE}/chat`, {
+    const res = await fetch(`${BASE}/v1/chat`, {
       method: 'POST',
       headers: this.headers,
       body: JSON.stringify(body)
     })
     const data = await res.json()
     if (!res.ok) throw new Error(data.message || `Wubble chat error: ${res.status}`)
-    // Returns { requestId, status, ... }
     return data
   }
 
-  // Poll until done or failed
+  // GET /api/v1/request/:requestId/status — bearer auth
   async pollStatus(requestId) {
-    const res = await fetch(`${BASE}/polling/${requestId}`, { headers: this.headers })
+    const res = await fetch(`${BASE}/v1/request/${requestId}/status`, { headers: this.headers })
     const data = await res.json()
     if (!res.ok) throw new Error(data.message || `Wubble poll error: ${res.status}`)
     return data
   }
 
-  async pollChatStatus(requestId) {
-    const res = await fetch(`${BASE}/polling/chat/${requestId}`, { headers: this.headers })
-    const data = await res.json()
-    if (!res.ok) throw new Error(data.message || `Wubble chat poll error: ${res.status}`)
-    return data
-  }
-
-  async predictPostPerformance(content, accountId) {
-    // Gracefully return empty prediction if not supported
-    try {
-      const res = await fetch(`${BASE}/predict`, {
-        method: 'POST',
-        headers: this.headers,
-        body: JSON.stringify({ content, accountId })
-      })
-      const data = await res.json()
-      if (!res.ok) return {}
-      return data
-    } catch {
-      return {}
-    }
+  async predictPostPerformance() {
+    return {}
   }
 
   // Upload a reference audio file (multipart)
   async uploadFile(fileBuffer, filename, mimetype) {
     const form = new FormData()
     form.set('file', new Blob([fileBuffer], { type: mimetype }), filename)
-
-    const res = await fetch(`${BASE}/files`, {
+    const res = await fetch(`${BASE}/v1/files`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${this.apiKey}` },
       body: form

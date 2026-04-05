@@ -35,8 +35,7 @@ export function WubbleSetup({ onProvisioned }: { onProvisioned: () => void }) {
 
         <h2 className="text-2xl font-black text-white mb-3">Connect Wubble AI</h2>
         <p className="text-gray-400 text-sm leading-relaxed mb-8">
-          Activate your Wubble AI account to start generating custom music for your content.
-          This takes one click.
+          Activate your Wubble AI account to start generating custom music for your content. This takes one click.
         </p>
 
         <div className="grid grid-cols-3 gap-3 mb-8">
